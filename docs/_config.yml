@@ -8,7 +8,7 @@ locale : "en-US"
 
 repository: microsoft/DeepSpeed
 baseurl: "/ghpages-test" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://shaden.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 remote_theme: "mmistakes/minimal-mistakes@4.19.0"
