@@ -48,4 +48,12 @@ defaults:
     values:
       layout: single
 
+# Outputting
+permalink: /:categories/:title/
+timezone: America/Los_Angeles
+
 breadcrumbs: true
+
+category_archive:
+  type: liquid
+  path: /categories/

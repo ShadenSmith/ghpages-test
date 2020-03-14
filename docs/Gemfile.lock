@@ -255,7 +255,6 @@ PLATFORMS
 
 DEPENDENCIES
   github-pages
-  jekyll (~> 3.5)
   jekyll-feed
   jekyll-include-cache
   jekyll-paginate
