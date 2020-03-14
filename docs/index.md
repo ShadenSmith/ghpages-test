@@ -110,7 +110,7 @@ combination. ZeRO boosts the scaling capability and efficiency further.
   and [GPT tutorial](./docs/tutorials/MegatronGPT2Tutorial.md).
   <!-- and [QANet tutorial](../../Tutorials/QANetTutorial.md). -->
 
-![DeepSpeed-vs-Megatron](/images/DeepSpeed-vs-Megatron.png)
+![DeepSpeed-vs-Megatron](/assets/images/DeepSpeed-vs-Megatron.png)
 <p align="center">
 <em>The figure depicts system throughput improvements of DeepSpeed (combining ZeRO-powered data parallelism with model parallelism of NVIDIA Megatron-LM) over using Megatron-LM alone.</em>
 </p>

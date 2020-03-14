@@ -5,8 +5,10 @@ description: >-
   DeepSpeed is a deep learning optimization library that makes distributed
   training easy, efficient, and effective.
 
+locale : "en-US"
+
 repository: microsoft/DeepSpeed
-baseurl: "/" # the subpath of your site, e.g. /blog
+baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
