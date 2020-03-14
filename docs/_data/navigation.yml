@@ -1,0 +1,9 @@
+main:
+  - title: "Getting Started"
+    url: /getting-started/
+  - title: "Blog"
+    url: /blog/
+  - title: "Tutorials"
+    url: /tutorials/
+  - title: "GitHub"
+    url: https://github.com/microsoft/DeepSpeed
