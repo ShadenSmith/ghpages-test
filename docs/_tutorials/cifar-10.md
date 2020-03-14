@@ -1,8 +1,6 @@
 ---
-layout: single
-title:  "CIFAR-10 Tutorial"
-date:   2020-03-13
-categories: tutorials
+title: "CIFAR-10 Tutorial"
+excerpt: "Train your first model with DeepSpeed!"
 ---
 
 If you haven't already, we advise you to first read through the [Getting
@@ -19,15 +17,15 @@ First we will go over how to run original CIFAR-10. Then we will proceed step-by
 
 Original model code from [CIFAR-10 Tutorial](https://github.com/pytorch/tutorials/blob/master/beginner_source/blitz/cifar10_tutorial.py), We've copied this repo under [DeepSpeedExamples/cifar/](https://github.com/microsoft/DeepSpeedExamples/tree/master/cifar) and made it available as a submodule. To download, execute:
 
-{% highlight bash %}
+```bash
 git submodule update --init --recursive
-{% endhighlight %}
+```
 
 To install requirements for CIFAR-10:
-{% highlight bash %}
+```bash
 cd DeepSpeedExamples/cifar
 pip install -r requirements.txt
-{% endhighlight %}
+```
 
 Run `python cifar10_tutorial.py`, it downloads the training data set at first run.
 ```
@@ -75,7 +73,7 @@ cuda:0
 
 The first step to apply DeepSpeed is adding DeepSpeed arguments to CIFAR-10 model, using `deepspeed.add_config_arguments()` function as below.
 
-{% highlight python %}
+```python
  import argparse
  import deepspeed
 
@@ -104,7 +102,7 @@ The first step to apply DeepSpeed is adding DeepSpeed arguments to CIFAR-10 mode
      args=parser.parse_args()
 
      return args
-{% endhighlight %}
+```
 
 
 
@@ -112,7 +110,7 @@ The first step to apply DeepSpeed is adding DeepSpeed arguments to CIFAR-10 mode
 
 We use `deepspeed.initialize` to create `model_engine`, `optimizer` and `trainloader`. Below is its definition.
 
-{% highlight python %}
+```python
 def initialize(args,
                model,
                optimizer=None,
@@ -122,11 +120,11 @@ def initialize(args,
                mpu=None,
                dist_init_required=True,
                collate_fn=None):
-{% endhighlight %}
+```
 
 For CIFAR-10 model, we initialize DeepSpeed its model (net) is created as below, to pass the raw `model`, `optimizer`, `args`, `parametersnd` and `trainset`.
 
-{% highlight python %}
+```python
  parameters = filter(lambda p: p.requires_grad, net.parameters())
  args=add_argument()
 
@@ -136,16 +134,16 @@ For CIFAR-10 model, we initialize DeepSpeed its model (net) is created as below,
  # 3) DeepSpeed optimizer
  model_engine, optimizer, trainloader, __ = deepspeed.initialize(args=args, model=net, model_parameters=parameters, training_data=trainset)
 
-{% endhighlight %}
+```
 
 The original device and optimizer can be removed after initializing DeepSpeed.
 
-{% highlight python %}
+```python
  #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
  #net.to(device)
 
  #optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-{% endhighlight %}
+```
 
 
 
@@ -153,7 +151,7 @@ The original device and optimizer can be removed after initializing DeepSpeed.
 
 The `model` returned by `deepspeed.initialize` is the _DeepSpeed Model Engine_ that we will use to train the model using the forward, backward and step API.
 
-{% highlight python %}
+```python
      for i, data in enumerate(trainloader):
          # get the inputs; data is a list of [inputs, labels]
          inputs = data[0].to(model_engine.device)
@@ -164,7 +162,7 @@ The `model` returned by `deepspeed.initialize` is the _DeepSpeed Model Engine_ t
 
          model_engine.backward(loss)
          model_engine.step()
-{% endhighlight %}
+```
 
 Zeroing the gradients is handled automatically by DeepSpeed after the weights have been updated using a mini-batch.
 
@@ -174,7 +172,7 @@ Zeroing the gradients is handled automatically by DeepSpeed after the weights ha
 
 The next step to use DeepSpeed is to create a configuration JSON file (ds_config.json). This file provides DeepSpeed specific parameters defined by the user, e.g., batch size, optimizer, scheduler and other parameters.
 
-{% highlight json %}
+```json
  {
    "train_batch_size": 4,
    "steps_per_print": 2000,
@@ -200,7 +198,7 @@ The next step to use DeepSpeed is to create a configuration JSON file (ds_config
    },
    "wall_clock_breakdown": false
  }
-{% endhighlight %}
+```
 
 
 
@@ -208,16 +206,13 @@ The next step to use DeepSpeed is to create a configuration JSON file (ds_config
 
 To start training CIFAR-10 model with DeepSpeed applied, execute the following command, it will use all detected GPUs by default.
 
-{% highlight bash %}
+```bash
 deepspeed cifar10_deepspeed.py --deepspeed_config ds_config.json
-{% endhighlight %}
-
-
+```
 
 DeepSpeed usually prints more training details for user to monitor, including training settings, performance statistics and loss trends.
-
 ```
-deepspeed.pt --num_nodes 1 --num_gpus 1 cifar10_deepspeed.py --deepspeed --deepspeed_config ds_config.json
+deepspeed.pt cifar10_deepspeed.py --deepspeed_config ds_config.json
 Warning: Permanently added '[192.168.0.22]:42227' (ECDSA) to the list of known hosts.
 cmd=['pdsh', '-w', 'worker-0', 'export NCCL_VERSION=2.4.2; ', 'cd /data/users/deepscale/test/ds_v2/examples/cifar;', '/usr/bin/python', '-u', '-m', 'deepspeed.pt.deepspeed_launch', '--world_info=eyJ3b3JrZXItMCI6IFswXX0=', '--node_rank=%n', '--master_addr=192.168.0.22', '--master_port=29500', 'cifar10_deepspeed.py', '--deepspeed', '--deepspeed_config', 'ds_config.json']
 worker-0: Warning: Permanently added '[192.168.0.22]:42227' (ECDSA) to the list of known hosts.

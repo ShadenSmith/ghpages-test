@@ -1,4 +1,3 @@
-
 title: DeepSpeed
 email: deepspeed@microsoft.com
 description: >-
@@ -12,7 +11,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
-remote_theme: "mmistakes/minimal-mistakes@4.9.0"
+remote_theme: "mmistakes/minimal-mistakes@4.19.0"
 minimal_mistakes_skin : "air"
 
 plugins:
@@ -20,8 +19,8 @@ plugins:
   - jekyll-include-cache
   - jekyll-paginate
 
-paginate: 10
-paginate_path: /blog/page:num
+#paginate: 10
+#paginate_path: /blog/page:num
 
 include: ["_pages"]
 
@@ -37,7 +36,7 @@ defaults:
     values:
       layout: single
       author_profile: false
-      read_time: false
+      read_time: true
       comments: false
       share: true
       related: false
@@ -47,13 +46,10 @@ defaults:
       type: tutorials
     values:
       layout: single
+      toc: true
+      toc_label: "Contents"
+      sidebar:
+        nav: "lnav"
 
-# Outputting
-permalink: /:categories/:title/
 timezone: America/Los_Angeles
-
 breadcrumbs: true
-
-category_archive:
-  type: liquid
-  path: /categories/

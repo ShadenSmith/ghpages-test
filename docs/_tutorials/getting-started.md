@@ -1,8 +1,7 @@
 ---
-layout: single
 title: "Getting Started"
 permalink: /getting-started/
-categories: tutorials
+excerpt: "First steps with DeepSpeed"
 ---
 
 ## Installation
