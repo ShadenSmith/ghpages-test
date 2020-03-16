@@ -21,6 +21,7 @@ class Mock(MagicMock):
             return MagicMock()
 MOCK_MODULES = ['torch', 'torch.utils', 'torch.utils.data', 'torch.utils.data.distributed',
     'torch._utils', 'torch.cuda', 'torch.nn.modules', 'torch.nn', 'torch.distributed', 'torch.distributed.distributed_c10d',
+    'torch.optim',
     'torch._six']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
