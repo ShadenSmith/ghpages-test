@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.abspath('../../../'))
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
+            print(f'Mocking {name}')
             return MagicMock()
 
 MOCK_MODULES = ['torch']

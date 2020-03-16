@@ -5,6 +5,8 @@ main:
     url: /blog/
   - title: "Tutorials"
     url: /tutorials/
+  - title: "Documentation"
+    url: /api/
   - title: "GitHub"
     url: https://github.com/microsoft/DeepSpeed
 
