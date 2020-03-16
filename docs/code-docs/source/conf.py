@@ -12,6 +12,18 @@
 
 import os
 import sys
+
+import sys
+from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+MOCK_MODULES = ['torch']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 sys.path.insert(0, os.path.abspath('../../../'))
 
 # -- Project information -----------------------------------------------------
@@ -66,14 +78,3 @@ html_context = {
     "conf_py_path": "/docs/code-docs/source/",
 }
 
-
-import sys
-from unittest.mock import MagicMock
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
-
-MOCK_MODULES = ['torch']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
