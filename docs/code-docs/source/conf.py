@@ -19,7 +19,7 @@ class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
             return MagicMock()
-MOCK_MODULES = ['torch', 'torch.utils', 'torch._utils', 'torch.cuda', 'torch.nn.modules', 'torch.nn', 'torch.distributed', 'torch.distributed.distributed_c10d',
+MOCK_MODULES = ['torch', 'torch.utils', 'torch.utils.data', 'torch._utils', 'torch.cuda', 'torch.nn.modules', 'torch.nn', 'torch.distributed', 'torch.distributed.distributed_c10d',
     'torch._six']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
