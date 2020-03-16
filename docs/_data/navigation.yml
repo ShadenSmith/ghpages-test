@@ -6,7 +6,7 @@ main:
   - title: "Tutorials"
     url: /tutorials/
   - title: "Documentation"
-    url: /api/
+    url: https://ghpages-test.readthedocs.io/
   - title: "GitHub"
     url: https://github.com/microsoft/DeepSpeed
 
