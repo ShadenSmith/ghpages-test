@@ -21,10 +21,10 @@ sys.path.insert(0, os.path.abspath('../../../'))
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-            print(f'Mocking {name}')
+            print(f'Mocking {cls} {name}')
             return MagicMock()
 
-MOCK_MODULES = ['torch']
+MOCK_MODULES = ['torch.distributed', 'torch']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
