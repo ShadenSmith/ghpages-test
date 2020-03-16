@@ -13,19 +13,6 @@
 import os
 import sys
 
-from unittest.mock import MagicMock
-sys.path.insert(0, os.path.abspath('../../../'))
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return MagicMock()
-MOCK_MODULES = ['torch', 'torch.utils', 'torch.utils.data', 'torch.utils.data.distributed',
-    'torch._utils', 'torch.cuda', 'torch.nn.modules', 'torch.nn', 'torch.distributed', 'torch.distributed.distributed_c10d',
-    'torch.optim',
-    'torch._six']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
-
 # -- Project information -----------------------------------------------------
 
 project = 'DeepSpeed'
@@ -35,6 +22,7 @@ author = 'Microsoft AI & Research'
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
 
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 
@@ -77,4 +65,18 @@ html_context = {
     "github_version": "master",
     "conf_py_path": "/docs/code-docs/source/",
 }
+
+
+# Mock imports so we don't have to install torch to build the docs.
+from unittest.mock import MagicMock
+sys.path.insert(0, os.path.abspath('../../../'))
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return MagicMock()
+MOCK_MODULES = ['torch', 'torch.utils', 'torch.utils.data', 'torch.utils.data.distributed',
+    'torch._utils', 'torch.cuda', 'torch.nn.modules', 'torch.nn', 'torch.distributed', 'torch.distributed.distributed_c10d',
+    'torch.optim',
+    'torch._six']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
