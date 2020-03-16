@@ -22,7 +22,7 @@ class Mock(MagicMock):
             return Mock()
 
 MOCK_MODULES = ['torch', 'torch.distributed']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+sys.modules.update((mod_name, Mock) for mod_name in MOCK_MODULES)
 
 sys.path.insert(0, os.path.abspath('../../../'))
 
