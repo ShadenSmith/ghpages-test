@@ -12,8 +12,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('deepspeed'))
-
+sys.path.insert(0, os.path.abspath('../../../'))
 
 # -- Project information -----------------------------------------------------
 
@@ -64,5 +63,5 @@ html_context = {
     "github_user": "microsoft",
     "github_repo": "DeepSpeed",
     "github_version": "master",
-    "conf_py_path": "/code-docs/",
+    "conf_py_path": "/docs/code-docs/source/",
 }

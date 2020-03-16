@@ -23,6 +23,7 @@ plugins:
 #paginate_path: /blog/page:num
 
 include: ["_pages"]
+exclude: ["code-docs"]
 
 collections:
   tutorials:
