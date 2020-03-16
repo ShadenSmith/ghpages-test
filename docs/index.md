@@ -1,5 +1,7 @@
 ---
 layout: single
+toc: true
+toc_label: "Contents"
 ---
 
 DeepSpeed is a deep learning optimization library that makes distributed training easy,
@@ -15,18 +17,6 @@ compared to the state-of-art. Early adopters of DeepSpeed have already produced
 a language model (LM) with over 17B parameters called
 [Turing-NLG](https://www.microsoft.com/en-us/research/blog/turing-nlg-a-17-billion-parameter-language-model-by-microsoft),
 establishing a new SOTA in the LM category.
-
-
-# Table of Contents
-
-| Section                                 | Description                                 |
-| --------------------------------------- | ------------------------------------------- |
-| [Why DeepSpeed?](#why-deepspeed)        |  DeepSpeed overview                         |
-| [Getting Started](#getting-started)     |  DeepSpeed first steps                      |
-| [Further Reading](#further-reading)     |  DeepSpeed features, tutorials, etc.        |
-| [Contributing](#contributing)           |  Instructions for contributing to DeepSpeed |
-| [Publications](#publications)           |  DeepSpeed publications                     |
-
 
 
 # Why DeepSpeed?
