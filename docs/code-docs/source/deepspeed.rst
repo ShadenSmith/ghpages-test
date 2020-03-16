@@ -1,6 +1,13 @@
 deepspeed package
 =================
 
+Subpackages
+-----------
+
+.. toctree::
+
+   deepspeed.pt
+
 Module contents
 ---------------
 
