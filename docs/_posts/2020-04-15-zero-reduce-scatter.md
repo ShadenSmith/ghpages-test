@@ -72,7 +72,7 @@ We won't go into all the details in this post on how this part was implemented b
 
 We have evaluated our reduce-scatter implementation of ZeRO Stage 1 on two different types of hardware. 
 
-| Cluster         | Node Count | GPUs/node | Total GPUs | GPU Memory | Internode Bandwidth | Reduction in communication time |
+| Cluster         | Node Count | GPUs/node | Total GPUs | GPU Memory | Internode Bandwidth | Reduction in comm time |
 | --------------- | ---------- | --------- | ---------- | ---------- | ------------------- |----------------------- |
 | Azure NC24r3_v3 | 2          | 4         | 8          | 16 GB      | 40 Gbps             | 1.98x                  |
 | DGX-2H          | 8          | 16        | 128        | 32 GB      | 800 Gbps            | 0.50x                  |
