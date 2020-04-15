@@ -51,7 +51,7 @@ def reduce_scatter_gradients(self):
     
     # Accumulate output of reduce scatter is our local rank's 
     # partition, send our local copy of all partitions.
-	dist.reduce_scatter(output=flat_partitions[rank],
+    dist.reduce_scatter(output=flat_partitions[rank],
                         input_list=flat_partitions,
                         op=ReduceOp.SUM,
                         group=self.dp_process_group)
@@ -59,7 +59,7 @@ def reduce_scatter_gradients(self):
     # Divide by data parallel world size thus averaging gradients
     flat_partitions[rank].mul_(1.0 / self.dp_world_size)
     
-	return flat_partitions
+    return flat_partitions
 ```
 
 However, life is not this simple in practice. In order for this reduce scatter approach to support large models we must implement a version of this that limits the gradient exchanges to no more than 2GB worth of data. This allows us to ensure we keep a fixed memory overhead w.r.t. our communication operations while still achieving high throughput between nodes during training.
