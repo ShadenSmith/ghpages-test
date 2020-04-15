@@ -1,7 +1,7 @@
 ## ZeRO Stage 1 with reduced communication
 
 As introduced in our paper, [ZeRO: Memory Optimization Towards Training A Trillion Parameter Models](https://arxiv.org/abs/1910.02054), we propose three stages of ZeRO that build on top of one another in order to drastically reduce the memory overhead required to train large deep learning models. Specifically these stages are described the the figure below.
-![](/assets/images/zero_stages.PNG)
+![](/ghpages_test/assets/images/zero_stages.PNG)
 
 In the process of evaluating our proposed techniques we implemented ZeRO Stage 1 (P<sub>os</sub>) that partitions optimizer states across data parallel ranks. However, as discussed in Section 9.1 of our paper, instead of using a [reduce-scatter](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#reducescatter) operation to reduce gradients to the their respective partition owners we instead used an [all-reduce](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#allreduce) which increased Stage 1 of ZeRO's communication overhead by 1.5x. This all-reduce happens in DeepSpeed at the end of the backward pass regardless of if you are using ZeRO or not. More details can be seen in [deepspeed/pt/deepspeed_light.py](https://github.com/microsoft/DeepSpeed/blob/90017d3a31beee0ef5421ac08edcd0fa441eea11/deepspeed/pt/deepspeed_light.py#L802-L827), however we have simplified the code below for readability.
 
@@ -30,10 +30,10 @@ We recognized the opportunity for removing ZeRO's communication overhead from 1.
 ### ZeRO with reduce-scatter
 
 In order to understand how this works let's first dive into how ZeRO partitions optimizer state across parameters in a model. Let's first consider a small model with only 10 parameters as seen below as a single list, the width of each parameter (p) represents the relative size of the parameter in the model.
-![](/assets/images/zero_params.PNG)
+![](/ghpages_test/assets/images/zero_params.PNG)
 
 When we apply ZeRO P<sub>os</sub> to this model the parameters above are associated with a specific data parallel rank during the model update phase of training. Let's consider a training job with 4 ranks, the allocation of ranks to parameters would be something like the following. Each rank is responsible for updating the parameters in its partition during the optimizer.step() phase.
-![](/assets/images/zero_params_ranks.PNG)
+![](/ghpages_test/assets/images/zero_params_ranks.PNG)
 
 This means that during the gradient averaging phase of training each rank is only required to receive the gradients for the parameters it is responsible for. In our example above, rank 2 only requires the entire gradients for parameters 4 and 5 and only requires partial gradients for parameters 3 and 6.
 
@@ -62,7 +62,7 @@ However, life is not this simple in practice. In order for this reduce scatter a
 
 We won't go into all the details in this post on how this part was implemented but we urge you to read our code for more details. Let's assume our simple 10 parameter model represents 6GB of data. We will now require 3 separate reduce_scatter invocations to exchange all the gradients in the model. This requires us to partition our ranks in a different way to respect communication boundaries so we can exchange the gradients as they become available. We can see an example partitioning below.
 
-![](/assets/images/zero_w_comm.PNG)
+![](/ghpages_test/assets/images/zero_w_comm.PNG)
 
 ### Results
 
