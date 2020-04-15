@@ -10,12 +10,12 @@ In the process of evaluating our proposed techniques we implemented ZeRO Stage 1
         # Flatten a bucket of tensors into a single tensor
         tensor_to_allreduce = flatten(bucket)
         
-        # Perform the all_reduce on the data parallel (dp) process group
+        # Perform all_reduce on the data parallel process group
         dist.all_reduce(tensor_to_allreduce, 
                         op=ReduceOp.SUM, 
                         group=self.data_parallel_group)
 
-        # Divide by data parallel world size thus averaging gradients across ranks
+        # Average gradients w.r.t. data parallel world size 
         tensor_to_allreduce.mul_(1.0 / self.dp_world_size)
         
         return tensor_to_allreduce
@@ -41,12 +41,13 @@ ZeRO maintains flat partitions for each data parallel rank, along with all bookk
 
 ```python
 def reduce_scatter_gradients(self):
-    # Fetch list of flat partitions of gradients across all data parallel ranks,
-    # each index of the list corresponds to a different rank.
+    # Fetch list of flat gradient partitions across all data 
+    # parallel ranks, each index of the list corresponds to a 
+    # different rank.
     flat_partitions = self.get_flat_partitions()
     
-    # Accumulate output of reduce scatter is our local rank's partition, 
-    # send our local copy of all partitions.
+    # Accumulate output of reduce scatter is our local rank's 
+    # partition, send our local copy of all partitions.
 	dist.reduce_scatter(output=flat_partitions[rank],
                         input_list=flat_partitions,
                         op=ReduceOp.SUM,
