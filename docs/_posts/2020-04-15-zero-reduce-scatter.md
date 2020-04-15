@@ -24,19 +24,19 @@ if you are using ZeRO or not (note: DeepSpeed without ZeRO does not inccur this
 however we have simplified the code below for readability.
 
 ```python
-    def allreduce_bucket(self, bucket):
-        # Flatten a bucket of tensors into a single tensor
-        tensor_to_allreduce = flatten(bucket)
-        
-        # Perform all_reduce on the data parallel process group
-        dist.all_reduce(tensor_to_allreduce, 
-                        op=ReduceOp.SUM, 
-                        group=self.data_parallel_group)
+def allreduce_bucket(self, bucket):
+    # Flatten a bucket of tensors into a single tensor
+    tensor_to_allreduce = flatten(bucket)
+    
+    # Perform all_reduce on the data parallel process group
+    dist.all_reduce(tensor_to_allreduce, 
+                    op=ReduceOp.SUM, 
+                    group=self.data_parallel_group)
 
-        # Average gradients w.r.t. data parallel world size 
-        tensor_to_allreduce.mul_(1.0 / self.dp_world_size)
-        
-        return tensor_to_allreduce
+    # Average gradients w.r.t. data parallel world size 
+    tensor_to_allreduce.mul_(1.0 / self.dp_world_size)
+    
+    return tensor_to_allreduce
 ```
 
 Each bucket in the above code is capped at a certain size threshold (e.g., 2
