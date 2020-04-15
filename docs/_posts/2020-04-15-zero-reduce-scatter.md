@@ -1,7 +1,7 @@
 ## ZeRO Stage 1 with reduced communication
 
 As introduced in our paper, [ZeRO: Memory Optimization Towards Training A Trillion Parameter Models](https://arxiv.org/abs/1910.02054), we propose three stages of ZeRO that build on top of one another in order to drastically reduce the memory overhead required to train large deep learning models. Specifically these stages are described the the figure below.
-![](../assets/images/zero_stages.PNG)
+![](/assets/images/zero_stages.PNG)
 
 In the process of evaluating our proposed techniques we implemented ZeRO Stage 1 (P<sub>os</sub>) that partitions optimizer states across data parallel ranks. However, as discussed in Section 9.1 of our paper, instead of using a [reduce-scatter](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#reducescatter) operation to reduce gradients to the their respective partition owners we instead used an [all-reduce](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#allreduce) which increased Stage 1 of ZeRO's communication overhead by 1.5x. This all-reduce happens in DeepSpeed at the end of the backward pass regardless of if you are using ZeRO or not. More details can be seen in [deepspeed/pt/deepspeed_light.py](https://github.com/microsoft/DeepSpeed/blob/90017d3a31beee0ef5421ac08edcd0fa441eea11/deepspeed/pt/deepspeed_light.py#L802-L827), however we have simplified the code below for readability.
 
