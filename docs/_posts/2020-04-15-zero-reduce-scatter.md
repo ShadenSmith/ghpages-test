@@ -70,7 +70,12 @@ We won't go into all the details in this post on how this part was implemented b
 
 ### Results
 
-We have evaluated our reduce-scatter implementation of ZeRO Stage 1 on two different types of hardware. 
+We have evaluated our reduce-scatter implementation of ZeRO Stage 1 on two
+different types of hardware and compared the relative communication time
+compared to our original all-reduce implementation. The amount of communication
+time reduction is relative to the bandwidth available your cluster. For
+example, we see a more dramatic impact of reduce-scatter on lower speed
+interconnects.
 
 | Cluster         | Node Count | GPUs/node | Total GPUs | GPU Memory | Internode Bandwidth | Reduction in comm time |
 | --------------- | ---------- | --------- | ---------- | ---------- | ------------------- |----------------------- |
