@@ -1,10 +1,27 @@
 ## ZeRO Stage 1 with reduced communication
 
-As introduced in our paper, [ZeRO: Memory Optimization Towards Training A Trillion Parameter Models](https://arxiv.org/abs/1910.02054), we propose three stages of ZeRO that build on top of one another in order to drastically reduce the memory overhead required to train large deep learning models. Specifically these stages are described the the figure below.
+As introduced in our paper, [ZeRO: Memory Optimization Towards Training A
+Trillion Parameter Models](https://arxiv.org/abs/1910.02054), we propose three
+stages of ZeRO that build on top of one another in order to drastically reduce
+the memory overhead required to train large deep learning models. Specifically
+these stages are described in the figure below, taken from Figure 2 of our
+paper.
 
 ![](/ghpages-test/assets/images/zero_stages.PNG)
 
-In the process of evaluating our proposed techniques we implemented ZeRO Stage 1 (P<sub>os</sub>) that partitions optimizer states across data parallel ranks. However, as discussed in Section 9.1 of our paper, instead of using a [reduce-scatter](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#reducescatter) operation to reduce gradients to the their respective partition owners we instead used an [all-reduce](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#allreduce) which increased Stage 1 of ZeRO's communication overhead by 1.5x. This all-reduce happens in DeepSpeed at the end of the backward pass regardless of if you are using ZeRO or not. More details can be seen in [deepspeed/pt/deepspeed_light.py](https://github.com/microsoft/DeepSpeed/blob/90017d3a31beee0ef5421ac08edcd0fa441eea11/deepspeed/pt/deepspeed_light.py#L802-L827), however we have simplified the code below for readability.
+In the process of evaluating our proposed techniques we implemented ZeRO Stage
+1 (P<sub>os</sub>) that partitions optimizer states across data parallel ranks.
+However, as discussed in Section 9.1 of our paper, instead of using a
+[reduce-scatter](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#reducescatter)
+operation to reduce gradients to the their respective partition owners we
+instead used an
+[all-reduce](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#allreduce)
+which increased Stage 1 of ZeRO's overall communication overhead by 1.5x. This
+all-reduce happens in DeepSpeed at the end of the backward pass regardless of
+if you are using ZeRO or not (note: DeepSpeed without ZeRO does not inccur this
+1.5x overhead). More details can be seen in
+[deepspeed/pt/deepspeed_light.py](https://github.com/microsoft/DeepSpeed/blob/90017d3a31beee0ef5421ac08edcd0fa441eea11/deepspeed/pt/deepspeed_light.py#L802-L827),
+however we have simplified the code below for readability.
 
 ```python
     def allreduce_bucket(self, bucket):
@@ -22,9 +39,21 @@ In the process of evaluating our proposed techniques we implemented ZeRO Stage 1
         return tensor_to_allreduce
 ```
 
-Each bucket in the above code represents at most 2GB worth of data, this is to ensure we keep a fixed memory overhead w.r.t. our all-reduce operations while still achieving high throughput between nodes during training.
+Each bucket in the above code is capped at a certain size threshold (e.g., 2
+GB), this is to ensure we keep a fixed memory overhead w.r.t. our all-reduce
+operations while still achieving high throughput between nodes during training.
 
-In this initial implementation once the backward pass has completed and all of the model's gradients are averaged we are ready to apply them to our model via an `optimizer.step()`. However, each data parallel rank is only responsible for updating the parameters of a subset of the model. This is because ZeRO pre-partitions the optimizer state across data parallel ranks. This means that, in practice, for a given data parallel rank it is not using the vast majority of the averaged gradients it has received! Specifically, each rank is only updating its model parameters using `1/N` of the averaged gradients that it has in memory. `N` in this case represents the total number of data parallel ranks in our training, which can easily be in the 100s or higher if you are training large sized models like we are.
+In this initial implementation once the backward pass has completed and all of
+the model's gradients are averaged we are ready to apply them to our model via
+an `optimizer.step()`. However, each data parallel rank is only responsible for
+updating the parameters of a subset of the model. This is because ZeRO
+pre-partitions the optimizer state across data parallel ranks. This means that,
+in practice, for a given data parallel rank it is not using the vast majority
+of the averaged gradients it has received! Specifically, each rank is only
+updating its model parameters using `1/N` of the averaged gradients that it has
+in memory. `N` in this case represents the total number of data parallel ranks
+in our training, which can easily be in the 100s or higher if you are training
+large sized models like we are.
 
 We recognized the opportunity for removing ZeRO's communication overhead from 1.5x early in the design of ZeRO through the use of a reduce-scatter instead of an all-reduce. We are pleased to say we are now updating our public implementation of ZeRO Stage 1 with reduce-scatter and thus eliminating this previous 1.5x communication overhead.
 
@@ -71,8 +100,8 @@ We won't go into all the details in this post on how this part was implemented b
 ### Results
 
 We have evaluated our reduce-scatter implementation of ZeRO Stage 1 on two
-different types of hardware and compared the relative communication time
-compared to our original all-reduce implementation. The amount of communication
+different types of hardware and compared the relative gradient communication
+time with our original all-reduce implementation. The amount of communication
 time reduction is relative to the bandwidth available your cluster. For
 example, we see a more dramatic impact of reduce-scatter on lower speed
 interconnects.
