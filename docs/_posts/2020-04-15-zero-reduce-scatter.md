@@ -62,7 +62,7 @@ However, life is not this simple in practice. In order for this reduce scatter a
 
 We won't go into all the details in this post on how this part was implemented but we urge you to read our code for more details. Let's assume our simple 10 parameter model represents 6GB of data. We will now require 3 separate reduce_scatter invocations to exchange all the gradients in the model. This requires us to partition our ranks in a different way to respect communication boundaries so we can exchange the gradients as they become available. We can see an example partitioning below.
 
-![](/ghpages-test/assets/images/zero_w_comm.PNG)
+![](/ghpages-test/assets/images/zero_w_comm2.png)
 
 ### Results
 
