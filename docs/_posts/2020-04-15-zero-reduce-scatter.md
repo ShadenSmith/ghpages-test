@@ -125,7 +125,7 @@ different way to respect communication boundaries so we can exchange the
 gradients as they become available during training. Below we see an example of
 a partitioning that respects our communication thresholding.
 
-![](/ghpages-test/assets/images/zero_w_comm2.png)
+![](/ghpages-test/assets/images/zero_w_comm.png)
 
 ### Results
 
