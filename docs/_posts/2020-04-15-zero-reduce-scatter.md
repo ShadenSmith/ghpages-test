@@ -7,7 +7,7 @@ the memory overhead required to train large deep learning models. Specifically
 these stages are described in the figure below, taken from Figure 2 of our
 paper.
 
-![](/ghpages-test/assets/images/zero_stages.PNG)
+![](../assets/images/zero_stages.PNG)
 
 In the process of evaluating our proposed techniques we implemented ZeRO Stage
 1 (P<sub>os</sub>) that partitions optimizer states across data parallel ranks.
@@ -68,7 +68,7 @@ optimizer state across parameters in a model. Let's first consider a small
 model with only 10 parameters as seen below as a single list, the width of each
 parameter (p) represents the relative size of the parameter in the model.
 
-![](/ghpages-test/assets/images/zero_params.PNG)
+![](../assets/images/zero_params.PNG)
 
 When we apply ZeRO P<sub>os</sub> to this model the parameters above are
 associated with a specific data parallel rank during the model update phase of
@@ -76,7 +76,7 @@ training. Let's consider a training job with 4 ranks, the allocation of ranks
 to parameters would be something like the following. Each rank is responsible
 for updating the parameters in its partition during the optimizer step phase.
 
-![](/ghpages-test/assets/images/zero_params_ranks.PNG)
+![](../assets/images/zero_params_ranks.PNG)
 
 This means that during the gradient averaging phase of training each rank is
 only required to receive the gradients for the parameters it is responsible
@@ -125,7 +125,7 @@ different way to respect communication boundaries so we can exchange the
 gradients as they become available during training. Below we see an example of
 a partitioning that respects our communication thresholding.
 
-![](/ghpages-test/assets/images/zero_w_comm.PNG)
+![](../assets/images/zero_w_comm.PNG)
 
 ### Results
 
