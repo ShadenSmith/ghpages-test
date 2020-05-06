@@ -1,13 +1,97 @@
 ## ZeRO Stage 1 with reduced communication
 
+We are happy to report an update to DeepSpeed's implementation of ZeRO that
+reduces the communication volume of ZeRO-powered data parallelism by 1/3. Now
+ZeRO-powered data parallelism incurs the same communication as classic data
+parallel while achieving memory savings up to 4x. To try it out, you only
+need to update to the latest version of DeepSpeed and turn on the [ZeRO
+DeepSpeed configuration
+flag](https://www.deepspeed.ai/docs/config-json/#fp16-training-options).
+
+
+### Background
+
 As introduced in our paper, [ZeRO: Memory Optimization Towards Training A
-Trillion Parameter Models](https://arxiv.org/abs/1910.02054), we propose three
-stages of ZeRO that build on top of one another in order to drastically reduce
-the memory overhead required to train large deep learning models. Specifically
-these stages are described in the figure below, taken from Figure 2 of our
-paper.
+Trillion Parameter Models](https://arxiv.org/abs/1910.02054), we propose a set
+of techniques to drastically reduce the memory overhead required to train large
+deep learning models. For more details please refer to our previous [blog
+post](https://www.microsoft.com/en-us/research/blog/zero-deepspeed-new-system-optimizations-enable-training-models-with-over-100-billion-parameters/)
+or our paper (referenced above).
+
+DeepSpeed's current implementation of ZeRO is stage 1 (ZeRO-OS), which
+partitions optimization states, as shown in the figure below. While classic
+data parallelism replicates optimizer states across devices, ZeRO-OS
+_partitions_ this state across devices, thus introducing significant memory
+savings. Max memory saving is 4x compared with classic data parallelism. To
+find out more details, please refer to our paper referenced above. The key
+point of this post is to discuss the communication pattern and volume required
+by ZeRO's partitioned optimizer states.
 
 ![](../../../assets/images/zero_stages.PNG)
+
+
+### Communication of previous ZeRO-OS implementation
+
+The top half of the figure below shows the communication pattern and volume for
+classic data parallelism when training a single mini-batch. Classic data
+parallelism uses a ring
+[all-reduce](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#allreduce)
+collective to gather and average gradients across all data-parallel processes.
+The ring all-reduce algorithm incurs a communication volume of 2N, where N are
+the number of data-parallel processes used in training.
+
+The previous version of ZeRO-OS performs the first step discussed above but
+also adds an additional step seen in the bottom half of the figure in order to
+collect the updated model parameters after the gradients have been applied.
+This is done with an
+[all-gather](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#allgather)
+operation which inccurs an additional communication volume of N. This results
+in ZeRO-OS's overall communication volume of 3N.
+
+For more details on communication analysis of ring all-reduce we encourage you
+to read the following post, [Visual intuition on ring-Allreduce for distributed
+Deep
+Learning](https://towardsdatascience.com/visual-intuition-on-ring-allreduce-for-distributed-deep-learning-d1f34b4911da).
+
+![](../../../assets/images/zero_comm_overhead.png)
+
+### Improved communication of ZeRO-OS with reduce-scatter
+
+In order to reduce communication, we can replace ZeRO-OS's all-reduce seen
+above with a
+[reduce-scatter](https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/docs/usage/operations.html#reducescatter).
+The key idea is that each data-parallel process only requires the gradients
+corresponding to its parameter partition instead of all the gradients, which
+can be achieved with reduce-scatter, resulting in a communication volume of N.
+The figure below shows our updated overall communication volume is now 2N (N
+for reduce-scatter + N for all-gather).
+
+In comparison, classic data-parallelism incurs one all-reduce per minibatch,
+with total communication of 2N.  Our updated reduce-scatter implementation of
+ZeRO-OS has the same communication volume while obtaining significant memory
+savings!
+
+![](../../../assets/images/zero_rs_comm_overhead.png)
+
+### Emperical results
+
+We have evaluated our reduce-scatter implementation of ZeRO-OS on two
+different types of hardware and compared the relative gradient communication
+time with our original all-reduce implementation. The amount of communication
+time reduction is relative to the bandwidth available in your cluster. For
+example, we see a more dramatic impact of reduce-scatter on lower speed
+interconnects.
+
+| Cluster         | Node Count | GPUs/node | Total GPUs | GPU Memory | Internode Bandwidth | Reduction in comm time |
+| --------------- | ---------- | --------- | ---------- | ---------- | ------------------- |----------------------- |
+| Azure NC24r3_v3 | 2          | 4         | 8          | 16 GB      | 40 Gbps             | 1.98x                  |
+| DGX-2H          | 8          | 16        | 128        | 32 GB      | 800 Gbps            | 0.50x                  |
+
+###  Implementation details
+
+To try out our updated version of ZeRO-OS you simply need to update to the
+latest version of DeepSpeed and turn on ZeRO. If you are interested in some of
+the internals, here is how we implemented it.
 
 In the process of evaluating our proposed techniques we implemented ZeRO Stage
 1 (P<sub>os</sub>) that partitions optimizer states across data parallel ranks.
@@ -119,7 +203,7 @@ between nodes during training.
 We won't go into all the details in this post on how this part was implemented
 but we urge you to read our code for more details. Let's assume our simple 10
 parameter model represents 6 GB of data and our comminication threshold is 2
-GB. We will now require 3 separate reduce_scatter invocations to exchange all
+GB. We will now require 3 separate reduce\_scatter invocations to exchange all
 the gradients in the model. This requires us to partition our ranks in a
 different way to respect communication boundaries so we can exchange the
 gradients as they become available during training. Below we see an example of
@@ -127,17 +211,4 @@ a partitioning that respects our communication thresholding.
 
 ![](../../../assets/images/zero_w_comm.PNG)
 
-### Results
-
-We have evaluated our reduce-scatter implementation of ZeRO Stage 1 on two
-different types of hardware and compared the relative gradient communication
-time with our original all-reduce implementation. The amount of communication
-time reduction is relative to the bandwidth available your cluster. For
-example, we see a more dramatic impact of reduce-scatter on lower speed
-interconnects.
-
-| Cluster         | Node Count | GPUs/node | Total GPUs | GPU Memory | Internode Bandwidth | Reduction in comm time |
-| --------------- | ---------- | --------- | ---------- | ---------- | ------------------- |----------------------- |
-| Azure NC24r3_v3 | 2          | 4         | 8          | 16 GB      | 40 Gbps             | 1.98x                  |
-| DGX-2H          | 8          | 16        | 128        | 32 GB      | 800 Gbps            | 0.50x                  |
 
