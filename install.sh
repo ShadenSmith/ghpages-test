@@ -11,6 +11,8 @@ usage() {
   echo """
 Usage: install.sh [options...]
 
+HI JEFF
+
 By default will install deepspeed and all third party dependecies accross all machines listed in
 hostfile (hostfile: /job/hostfile). If no hostfile exists, will only install locally
 
