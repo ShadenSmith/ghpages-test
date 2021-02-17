@@ -77,6 +77,9 @@ sys.path.insert(0, os.path.abspath('../../../'))
 # Prepend module names to class descriptions?
 add_module_names = True
 
+# Sort members by type
+autodoc_member_order = 'bysource'
+
 autoclass_content = 'both'
 
 autodoc_mock_imports = ["torch", "apex", "mpi4py", "tensorboardX", "numpy", "cupy"]

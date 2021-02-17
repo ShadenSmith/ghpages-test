@@ -9,6 +9,14 @@ Model Setup
 
    initialize
 
+Configuration
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   config
+
 Training API
 ------------
 
