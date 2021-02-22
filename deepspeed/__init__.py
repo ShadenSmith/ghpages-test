@@ -5,6 +5,7 @@ import sys
 import types
 
 from . import ops
+from . import config
 
 from .runtime.engine import DeepSpeedEngine
 from .runtime.engine import ADAM_OPTIMIZER, LAMB_OPTIMIZER
