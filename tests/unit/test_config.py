@@ -11,6 +11,8 @@ import torch.distributed as dist
 import deepspeed
 from deepspeed.runtime.config import DeepSpeedConfig
 
+from deepspeed.config import *
+
 
 def test_cuda():
     assert (torch.cuda.is_available())
@@ -226,3 +228,54 @@ def test_init_no_optimizer(tmpdir):
                 model.step()
 
     _helper()
+
+
+# New Config setup
+
+
+def _compare(config, base):
+    for key, val in base.items():
+        assert getattr(config, key) == val
+
+
+def test_base():
+    c = Config(name='jeff')
+    assert c.name == 'jeff'
+    assert c['name'] == 'jeff'
+
+    # Overwrite
+    c.name = 'samyam'
+    assert c.name == 'samyam'
+
+
+def test_dict():
+    d = {'name': 'tygra', 'color': 'orange'}
+    c = Config(**d)
+    _compare(c, d)
+
+    c = Config.from_dict(d)
+    _compare(c, d)
+
+
+def test_multiconfig():
+    # This tests that the metaprogramming works.
+    b1 = FP16Config(enabled=True)
+    b2 = FP16Config(enabled=False)
+    assert b1.enabled
+    assert not b2.enabled
+
+
+def test_nested():
+    c = TrainingConfig()
+    assert c.batch.train_batch_size is None
+
+    c.batch = BatchConfig(train_batch_size=32)
+    assert c.batch.train_batch_size == 32
+
+
+def test_valid():
+    b = BatchConfig()
+    # XXX should return False instead of raising an Exception?
+    # config.validate() might be a good alias for raising the Exception
+    with pytest.raises(ConfigError):
+        b.is_valid()
